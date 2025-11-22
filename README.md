@@ -14,7 +14,7 @@ Run the following command to get detectron2_full
 git submodule add https://github.com/facebookresearch/detectron2.git detectron2_full
 ```
 
-Expected Architecture: Please put ```detectron2``` & ```detectron2_full``` outside of ```cv_final```.
+Expected Architecture: Please put ```detectron2_full``` outside of ```cv_final```.
 ```
 .
 ├── cv_final(the whole thing you cloned)
