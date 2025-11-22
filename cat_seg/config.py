@@ -91,3 +91,10 @@ def add_cat_seg_config(cfg):
 
     cfg.MODEL.SEM_SEG_HEAD.CLIP_FINETUNE = "attention"
     cfg.TEST.SLIDING_WINDOW = False
+    
+    cfg.MODEL.CLIP_REFINE = CN()
+    cfg.MODEL.CLIP_REFINE.ENABLED = False
+    cfg.MODEL.CLIP_REFINE.SCORE_THRESH = 0.3
+    cfg.MODEL.CLIP_REFINE.LOW_FACTOR = 0.1
+    cfg.MODEL.CLIP_REFINE.BASE = 1.0
+    cfg.MODEL.CLIP_REFINE.GAIN = 0.0

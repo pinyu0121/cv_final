@@ -1,4 +1,6 @@
 # Copyright (c) Facebook, Inc. and its affiliates.
+from cat_seg.modeling.clip_refine import clip_refine_postprocess
+
 from typing import Tuple
 
 import torch
@@ -35,6 +37,8 @@ class CATSeg(nn.Module):
         clip_finetune: str,
         backbone_multiplier: float,
         clip_pretrained: str,
+        clip_refine_enabled: bool,   # 新增
+        clip_refine_cfg,             # 新增（CfgNode 或 dict 都可以）
     ):
         """
         Args:
@@ -43,7 +47,11 @@ class CATSeg(nn.Module):
         super().__init__()
         self.backbone = backbone
         self.sem_seg_head = sem_seg_head
+        
+        self.use_clip_refine = clip_refine_enabled
+        self.clip_refine_cfg = clip_refine_cfg
         if size_divisibility < 0:
+            
             size_divisibility = self.backbone.size_divisibility
         self.size_divisibility = size_divisibility
 
@@ -159,7 +167,7 @@ class CATSeg(nn.Module):
         self.layers = []
         for l in self.layer_indexes:
             self.sem_seg_head.predictor.clip_model.visual.transformer.resblocks[l].register_forward_hook(lambda m, _, o: self.layers.append(o))
-
+        
 
     @classmethod
     def from_config(cls, cfg):
@@ -180,6 +188,8 @@ class CATSeg(nn.Module):
             "clip_finetune": cfg.MODEL.SEM_SEG_HEAD.CLIP_FINETUNE,
             "backbone_multiplier": cfg.SOLVER.BACKBONE_MULTIPLIER,
             "clip_pretrained": cfg.MODEL.SEM_SEG_HEAD.CLIP_PRETRAINED,
+            "clip_refine_enabled": cfg.MODEL.CLIP_REFINE.ENABLED,
+            "clip_refine_cfg": cfg.MODEL.CLIP_REFINE,
         }
 
     @property
@@ -248,7 +258,23 @@ class CATSeg(nn.Module):
             return losses
 
         else:
-            outputs = outputs.sigmoid()
+            # outputs = outputs.sigmoid()
+            logits = outputs  # [B, C, H, W]
+
+            if self.use_clip_refine:
+                # 假設你有某個函式/屬性可以拿到 text_feats: [C, D]
+                text_feats = self.sem_seg_head.predictor.text_features_test  # 這部分要你自己看 head 裡怎麼算
+                logits = clip_refine_postprocess(
+                    logits=logits,
+                    pixel_feats=res3,  # 或你想用的其他 feature
+                    text_feats=text_feats,
+                    score_thresh=self.clip_refine_cfg.SCORE_THRESH,
+                    low_factor=self.clip_refine_cfg.LOW_FACTOR,
+                    base=self.clip_refine_cfg.BASE,
+                    gain=self.clip_refine_cfg.GAIN,
+                )
+            outputs = logits.sigmoid()
+            
             image_size = clip_images.image_sizes[0]
             height = batched_inputs[0].get("height", image_size[0])
             width = batched_inputs[0].get("width", image_size[1])

@@ -1,36 +1,41 @@
-# Parameter-efficient Fine-tuning in Hyperspherical Space for Open-vocabulary Semantic Segmentation (CVPR2025)
-
+# CVPDL FINAL PROJECT
 
 
 ### Installation and Data Preparation
 
-Please refer to the [CAT-Seg](https://github.com/cvlab-kaist/CAT-Seg) repository for guidance on:
-
-- Environment setup (Python version, dependencies, etc.)
-- Dataset preparation (e.g., COCO, ADE20K, Pascal VOC)
-
-### Training and Evaluation
-
-You can launch the entire training and evaluation pipeline using:
-
-```bash
-bash run_global.sh
-
+This project uses micromamba as its conda environment provider. 
+Please run the following command after you created a conda environment.
+```
+conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.7 -c pytorch -c nvidia
+```
+Expected Architecture: Please put ```detectron2``` & ```detectron2_full``` outside of ```cv_final```, as if you clone the whole thing directly it would be inside of it.
+```
+.
+├── cv_final(the whole thing you cloned)
+├── detectron2
+└── detectron2_full
 ```
 
-### Acknowledgement
-Thanks to the excellent works and their codebases of [CAT-Seg](https://github.com/cvlab-kaist/CAT-Seg). 
+### Dataset setup
+Check the file, as there might be several data paths that you should modify. 
+```
+bash setup_ade20k_dataset.sh
+```
+###  Evaluation & Inference
+Please add the ```model_final.pth``` to a folder ```pretrained_models``` under ```cv_final``` to run the following command nice and clean. If you want to modify the path, please ensure```eval_ade150_only.sh``` is also modified.
 
-### Citation
+This runs the baseline.
+```bash
+bash eval_ade150_only.sh
+```
 
-Please consider citing our paper if the code is helpful in your research and development.
+### Current Status
+✅ Baseline Model Training & Evaluation -> Reached mIoU 29.92%, training batch = 1 & inference batch = 4 
 
-```bibtex
-@inproceedings{peng2025parameter,
-  title={Parameter-efficient Fine-tuning in Hyperspherical Space for Open-vocabulary Semantic Segmentation},
-  author={Peng, Zelin and Xu, Zhengqin and Zeng, Zhilin and Huang, Yu and Wang, Yaoming and Shen, Wei},
-  booktitle={Proceedings of the Computer Vision and Pattern Recognition Conference},
-  pages={15009--15020},
-  year={2025}
-}
+✅ Added ```clip_refine.py``` as the modification of inference part -> It doesn't interfere with the baseline evaluation, so you can ignore it by now.
+
+🔴 Fix visulization part in ```eval_only_ade150.sh```
+
+🔴 Fix the code so that it could run inference with refined logits.
+
 
