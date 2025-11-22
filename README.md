@@ -8,11 +8,16 @@ Please run the following command after you created a conda environment.
 ```
 conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.7 -c pytorch -c nvidia
 ```
-Expected Architecture: Please put ```detectron2``` & ```detectron2_full``` outside of ```cv_final```, as if you clone the whole thing directly it would be inside of it.
+
+Run the following command to get detectron2_full
+```
+git submodule add https://github.com/facebookresearch/detectron2.git detectron2_full
+```
+
+Expected Architecture: Please put ```detectron2``` & ```detectron2_full``` outside of ```cv_final```.
 ```
 .
 ├── cv_final(the whole thing you cloned)
-├── detectron2
 └── detectron2_full
 ```
 
